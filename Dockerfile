@@ -28,9 +28,11 @@ RUN NODE_OPTIONS="--max-old-space-size=4096" pnpm run build
 # Prune dev dependencies
 RUN pnpm prune --prod
 
-# Remove unnecessary files
-RUN rm -rf apps/*/src apps/*/.next/cache apps/frontend/.next/cache \
-    libraries/*/src .git .github apps/extension apps/commands
+# Remove unnecessary files but keep Prisma schema
+RUN rm -rf apps/*/.next/cache apps/frontend/.next/cache \
+    .git .github apps/extension apps/commands && \
+    find apps/*/src -type f ! -name '*.prisma' -delete 2>/dev/null || true && \
+    find libraries/*/src -type f ! -name '*.prisma' -delete 2>/dev/null || true
 
 # Stage 2: Production Runtime
 FROM node:22-alpine AS runtime
